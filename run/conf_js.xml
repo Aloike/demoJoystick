@@ -1,0 +1,10 @@
+<data_map_list>
+ <data_map>
+  <key_in>axis0</key_in>
+  <key_out>pan</key_out>
+ </data_map>
+ <data_map>
+  <key_in>axis1</key_in>
+  <key_out>tilt</key_out>
+ </data_map>
+</data_map_list>
