@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 
+#include <QFile>
 #include <QInputDialog>
 #include <QMenuBar>
 #include <QStatusBar>
@@ -10,6 +11,18 @@
 
 #include "GBMappedData.h"
 #include "GBRawData.h"
+
+#define DBG(format,...) qDebug( "%s ==>"format, __PRETTY_FUNCTION__, ##__VA_ARGS__ )
+#define ERR(format,...) qWarning( "%s ==>"format, __PRETTY_FUNCTION__, ##__VA_ARGS__ )
+
+namespace Tags
+{
+    static const QString JoystickElement    = "joystick";
+    namespace Joystick
+    {
+        static const QString DeviceElement      = "device";
+    }
+}
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -30,11 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
     this->m_dataMapper->listenerAdd( this );
     this->m_dataMapper->listenerAdd( this->m_gbMappedData );
 
-    if( this->m_dataMapper->loadFromFile( "conf_js.xml" ) )  {
-        qDebug( "dataMapper file load OK" );
-    } else {
-        qWarning( "dataMapper file load ERROR" );
-    }
+
+
+    this->configLoadFromFile( "conf_js.xml" );
 }
 
 MainWindow::~MainWindow()
@@ -47,6 +58,66 @@ MainWindow::~MainWindow()
     this->m_joystick->listenerRemove( this );
 
     delete m_dataMapper;
+}
+
+bool    MainWindow::configLoadFromFile(const QString &argFileName)
+{
+#if 0
+    if( this->m_dataMapper->loadFromFile(  ) )  {
+        qDebug( "dataMapper file load OK" );
+    } else {
+        qWarning( "dataMapper file load ERROR" );
+    }
+#endif
+
+    QFile file( argFileName );
+    if( ! file.open( QFile::ReadOnly ) ) {
+        DBG( "Can't open file" );
+        return false;
+    }
+
+    QDomDocument domDoc;
+    QString errorString;
+    int errorColumn = -1;
+    int errorLine   = -1;
+    if( ! domDoc.setContent( &file, &errorString, &errorLine, &errorColumn ) ) {
+        ERR( "Error while loading content : %s",
+                  errorString.toStdString().c_str() );
+        ERR( "Line     == %d", errorLine );
+        ERR( "Column   == %d", errorColumn );
+        file.close();
+        return false;
+    }
+    file.close();
+
+
+    QDomElement joystickElmt
+            = domDoc.firstChildElement( Tags::JoystickElement );
+    if( joystickElmt.isNull() ) {
+        DBG( "No joystick element found in config file" );
+        return false;
+    }
+
+
+    QDomElement deviceElmt
+            = joystickElmt.firstChildElement( Tags::Joystick::DeviceElement );
+    if( deviceElmt.isNull() ) {
+        DBG( "No device set in config file" );
+    } else {
+        this->openJoystick( deviceElmt.text() );
+    }
+
+    QDomElement listElmt
+            = joystickElmt.firstChildElement( CDataMapper::elementName() );
+    if( listElmt.isNull() ) {
+        DBG( "No map list set in config file" );
+    } else {
+        if( ! this->m_dataMapper->loadFromDomElement( listElmt ) ) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void    MainWindow::create_layout()
@@ -78,6 +149,9 @@ void    MainWindow::create_menus()
 void MainWindow::on_CDataMapper_output( const QString &argKeyOut,
                                         const QVariant &argData )
 {
+    Q_UNUSED( argData )
+    Q_UNUSED( argKeyOut )
+
     // qDebug( "Value on argKeyOut `%s`", argKeyOut.toStdString().c_str() );
 }
 
@@ -151,18 +225,28 @@ void MainWindow::on_m_actionJoystickOpen_triggered()
                                           entryList,
                                           0, false, &ok );
     if (ok && !text.isEmpty()) {
-        qDebug( "Selected joystick : `%s`", text.toStdString().c_str() );
-
-        if( ! this->m_joystick->openJs( text.toStdString() ) )
-        {
-            qWarning( "Can't open joystick !" );
-        }
-        else
-        {
-            this->statusBar()->showMessage( tr( "Connected to `%1`" )
-                                            .arg( text ) );
-        }
-        m_actionJoystickClose->setEnabled( m_joystick->isOpen() );
-        m_actionJoystickOpen->setEnabled( ! m_joystick->isOpen() );
+        this->openJoystick( text );
     }
+}
+
+bool    MainWindow::openJoystick(const QString &argDevice)
+{
+    bool    ret = true;
+    DBG( "Selected joystick device : `%s`", argDevice.toStdString().c_str() );
+
+    if( ! this->m_joystick->openJs( argDevice.toStdString() ) )
+    {
+        ERR( "Can't open joystick !" );
+        ret = false;
+    }
+    else
+    {
+        this->statusBar()->showMessage( tr( "Connected to `%1`" )
+                                        .arg( argDevice ) );
+        ret = true;
+    }
+    m_actionJoystickClose->setEnabled( m_joystick->isOpen() );
+    m_actionJoystickOpen->setEnabled( ! m_joystick->isOpen() );
+
+    return ret;
 }

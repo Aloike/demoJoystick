@@ -8,19 +8,13 @@
 #include <QVariant>
 
 class CDataMapperListener;
+#include "CDataMapEntry.h"
 
 
 class CDataMapper
 {
 
 public:
-
-    struct MapEntry
-    {
-        QString in;
-        QString out;
-    };
-
 
     CDataMapper();
 
@@ -35,6 +29,7 @@ public:
     //--------------------------------------------------------------------------
     //  Config load/save
     //--------------------------------------------------------------------------
+    static QString  elementName(void);
     bool    loadFromFile( const QString& argFileName );
     bool    loadFromDomElement( const QDomElement& argRootElt );
 
@@ -42,8 +37,8 @@ public:
     //--------------------------------------------------------------------------
     //  Mapping management
     //--------------------------------------------------------------------------
-    bool    addEntryToMap(struct MapEntry argEntry);
-    bool    removeEntryFromMap(struct MapEntry argEntry);
+    bool    addEntryToMap(CDataMapEntry argEntry);
+    bool    removeEntryFromMap(CDataMapEntry argEntry);
     void    clearMap(void);
 
 
@@ -56,14 +51,14 @@ public:
 
 private:
 
-    struct MapEntry elementToStruct( const QDomElement& argRootElement );
 
 
-
+public:
+protected:
 private:
 
     QList<CDataMapperListener*> m_listeners;
-    QMap<QString,QString>       m_map;
+    QMap<QString,CDataMapEntry> m_map;
 };
 
 #endif // CDATAMAPPER_H

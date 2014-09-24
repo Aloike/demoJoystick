@@ -1,4 +1,26 @@
-<data_map_list>
+<?xml version="1.0" encoding="UTF-8"?>
+<joystick>
+    <device>/dev/input/js0</device>
+    <data_map_list>
+        <MapEntry>
+            <key_in>axis0</key_in>
+            <key_out>pan</key_out>
+        </MapEntry>
+        <MapEntry>
+            <key_in>axis1</key_in>
+            <key_out>tilt</key_out>
+            <factor in_step="5">0.01</factor> <!-- Toute valeur d'entrée dans la gamme [0;5] se fera appliquer le facteur 0.01 -->
+            <factor in_step="50">1</factor> <!-- De par le contenu de la ligne précédente, toute valeur d'entrée dans la gamme ]5;50] se fera appliquer le facteur 1 -->
+            <factor in_step="-5">0.01</factor> <!-- Toute valeur d'entrée dans la gamme [-5;0] se fera appliquer le facteur 0.01 -->
+            <factor in_step="-50">1</factor> <!-- De par le contenu de la ligne précédente, toute valeur d'entrée dans la gamme [-50;5[ se fera appliquer le facteur 1 -->
+        </MapEntry>
+
+    </data_map_list>
+</joystick>
+
+
+
+<!-- data_map_list>
  <data_map>
   <key_in>axis0</key_in>
   <key_out>pan</key_out>
@@ -7,4 +29,4 @@
   <key_in>axis1</key_in>
   <key_out>tilt</key_out>
  </data_map>
-</data_map_list>
+</data_map_list -->

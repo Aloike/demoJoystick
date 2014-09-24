@@ -34,6 +34,10 @@ private:
     void    create_layout(void);
     void    create_menus(void);
 
+    bool    configLoadFromFile( const QString& argFileName );
+
+    bool    openJoystick(const QString& argDevice);
+
 
 
 public slots:

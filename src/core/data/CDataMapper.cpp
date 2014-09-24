@@ -8,53 +8,57 @@
 #include "CDataMapperListener.h"
 
 
+#define DBG(format,...) qDebug( "%s ==> \t"format, __PRETTY_FUNCTION__, ##__VA_ARGS__ )
+#define ERR(format,...) qWarning( "%s ==> \t"format, __PRETTY_FUNCTION__, ##__VA_ARGS__ )
+
+
 namespace Tags
 {
     static const QString DataMapListElement = "data_map_list";
-    static const QString DataMapElement = "data_map";
-    namespace DataMap
-    {
-        static const QString In     = "key_in";
-        static const QString Out    = "key_out";
-    }
 }
 
+
+/* ########################################################################## */
+/* ########################################################################## */
 
 CDataMapper::CDataMapper()
 {
 }
 
-bool    CDataMapper::addEntryToMap(MapEntry argEntry)
+/* ########################################################################## */
+/* ########################################################################## */
+
+bool    CDataMapper::addEntryToMap(CDataMapEntry argEntry)
 {
     bool    ret = true;
 
     //--------------------------------------------------------------------------
     //  Check pre-conditions
     //--------------------------------------------------------------------------
-    if( argEntry.in.isNull() ) {
-        qDebug( "NULL key for `in`" );
+    if( argEntry.keyIn().isNull() ) {
+        DBG( "NULL key for `in`" );
         ret = false;
     }
 
-    if( ret && argEntry.out.isNull() ) {
-        qDebug( "NULL key for `out`" );
+    if( ret && argEntry.keyOut().isNull() ) {
+        DBG( "NULL key for `out`" );
         ret = false;
     }
 
 
 
-    if( ret && ! m_map.keys().contains( argEntry.in ) )
+    if( ret && ! m_map.keys().contains( argEntry.keyIn() ) )
     {
         /* The IN key is has not already been declared in the map */
-        m_map.insert( argEntry.in, argEntry.out );
+        m_map.insert( argEntry.keyIn(), argEntry );
         ret = true;
     }
-    else if( ret && ! m_map.values( argEntry.in ).contains( argEntry.out ) )
+    else if( ret && ! m_map.values( argEntry.keyIn() ).contains( argEntry ) )
     {
         /* The map contains the IN key but the output keys associated to it
          * don't contain the OUT key defined in argEntry, so add a new IN key
          * entry with the argEntry's OUT key as output. */
-        m_map.insertMulti( argEntry.in, argEntry.out );
+        m_map.insertMulti( argEntry.keyIn(), argEntry );
         ret = true;
     }
     else if( ret )
@@ -68,12 +72,26 @@ bool    CDataMapper::addEntryToMap(MapEntry argEntry)
     return ret;
 }
 
+/* ########################################################################## */
+/* ########################################################################## */
+
 void    CDataMapper::clearMap()
 {
     this->m_map.clear();
 }
 
-struct CDataMapper::MapEntry    CDataMapper::elementToStruct(const QDomElement &argRootElement)
+/* ########################################################################## */
+/* ########################################################################## */
+
+QString    CDataMapper::elementName()
+{
+    return Tags::DataMapListElement;
+}
+
+/* ########################################################################## */
+/* ########################################################################## */
+#if 0
+CDataMapEntry CDataMapper::elementToStruct(const QDomElement &argRootElement)
 {
     struct MapEntry ret;
     ret.in  = QString();
@@ -117,6 +135,9 @@ struct CDataMapper::MapEntry    CDataMapper::elementToStruct(const QDomElement &
 
     return ret;
 }
+#endif
+/* ########################################################################## */
+/* ########################################################################## */
 
 bool CDataMapper::listenerAdd(CDataMapperListener *argListener)
 {
@@ -136,6 +157,9 @@ bool CDataMapper::listenerAdd(CDataMapperListener *argListener)
     return ret;
 }
 
+/* ########################################################################## */
+/* ########################################################################## */
+
 bool CDataMapper::listenerRemove(CDataMapperListener *argListener)
 {
     if( m_listeners.contains( argListener ) ) {
@@ -149,6 +173,9 @@ bool CDataMapper::listenerRemove(CDataMapperListener *argListener)
     return false;
 }
 
+/* ########################################################################## */
+/* ########################################################################## */
+
 bool CDataMapper::loadFromDomElement(const QDomElement &argRootElt)
 {
     if( argRootElt.tagName() != Tags::DataMapListElement )
@@ -161,23 +188,32 @@ bool CDataMapper::loadFromDomElement(const QDomElement &argRootElt)
 
     this->clearMap();
 
-    QDomElement mapElmt = argRootElt.firstChildElement( Tags::DataMapElement );
+    QDomElement mapElmt
+            = argRootElt.firstChildElement( CDataMapEntry::tagName() );
     while( ! mapElmt.isNull() )
     {
-        qDebug( "Found dataMapElement !" );
+        DBG( "Found dataMapElement !" );
 
-        struct MapEntry lStruct = this->elementToStruct( mapElmt );
-        qDebug( "+-- Decoded element:" );
-        qDebug( "    +-- In     : `%s`", lStruct.in.toStdString().c_str() );
-        qDebug( "    +-- Out    : `%s`", lStruct.out.toStdString().c_str() );
+        CDataMapEntry mapEntry;
 
-        this->addEntryToMap( lStruct );
+        if( mapEntry.loadFromElement( mapElmt ) )
+        {
+            DBG( "+-- Decoded element:" );
+            DBG( "    +-- In     : `%s`", mapEntry.keyIn().toStdString().c_str() );
+            DBG( "    +-- Out    : `%s`", mapEntry.keyOut().toStdString().c_str() );
 
-        mapElmt = mapElmt.nextSiblingElement( Tags::DataMapElement );
+            this->addEntryToMap( mapEntry );
+        }
+
+
+        mapElmt = mapElmt.nextSiblingElement( CDataMapEntry::tagName() );
     }
 
     return true;
 }
+
+/* ########################################################################## */
+/* ########################################################################## */
 
 bool CDataMapper::loadFromFile(const QString &argFileName)
 {
@@ -209,22 +245,28 @@ bool CDataMapper::loadFromFile(const QString &argFileName)
     return this->loadFromDomElement( listElmt );
 }
 
+/* ########################################################################## */
+/* ########################################################################## */
 
 bool    CDataMapper::transmitData(const QString &argInKey, const QVariant &argData)
 {
     if( ! this->m_map.keys().contains( argInKey ) ) {
-        qDebug( "Unknown 'in' key `%s`", argInKey.toStdString().c_str() );
+        DBG( "Unknown 'in' key `%s`", argInKey.toStdString().c_str() );
         return false;
     }
 
 
-    foreach( QString lOutKey, m_map.values( argInKey ) )
+    foreach( CDataMapEntry lMapEntry, m_map.values( argInKey ) )
     {
         for( int l = 0 ; l < m_listeners.count() ; ++l )
         {
-            m_listeners.at( l )->on_CDataMapper_output( lOutKey, argData );
+            m_listeners.at( l )->on_CDataMapper_output( lMapEntry.keyOut(),
+                                                        argData );
         }
     }
 
     return true;
 }
+
+/* ########################################################################## */
+/* ########################################################################## */
