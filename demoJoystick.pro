@@ -33,7 +33,9 @@ SOURCES +=\
     src/core/data/CDataMapper.cpp \
     src/core/data/CDataMapperListener.cpp \
     src/ui/common/AxesTester.cpp \
-    src/ui/GBMappedData.cpp
+    src/ui/GBMappedData.cpp \
+    src/core/data/CDataMapEntry.cpp \
+    src/core/data/CDataMapEntryFactor.cpp
 
 HEADERS  += \
     src/ui/MainWindow.h \
@@ -45,7 +47,9 @@ HEADERS  += \
     src/core/data/CDataMapper.h \
     src/core/data/CDataMapperListener.h \
     src/ui/common/AxesTester.h \
-    src/ui/GBMappedData.h
+    src/ui/GBMappedData.h \
+    src/core/data/CDataMapEntry.h \
+    src/core/data/CDataMapEntryFactor.h
 
 OTHER_FILES += \
     run/conf_js.xml

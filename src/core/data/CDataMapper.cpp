@@ -90,54 +90,6 @@ QString    CDataMapper::elementName()
 
 /* ########################################################################## */
 /* ########################################################################## */
-#if 0
-CDataMapEntry CDataMapper::elementToStruct(const QDomElement &argRootElement)
-{
-    struct MapEntry ret;
-    ret.in  = QString();
-    ret.out = QString();
-
-
-    if( argRootElement.tagName() != Tags::DataMapElement ) {
-        return ret;
-    }
-
-
-    QDomElement elmtIn  = argRootElement.firstChildElement( Tags::DataMap::In );
-    QString lIn;
-    if( elmtIn.isNull() ) {
-        qDebug( "No in");
-        return ret;
-    } else {
-        lIn = elmtIn.text();
-        if( lIn.isEmpty() ) {
-            qWarning( "Empty 'in' key !" );
-            return ret;
-        }
-    }
-
-
-    QDomElement elmtOut  = argRootElement.firstChildElement( Tags::DataMap::Out );
-    QString lOut;
-    if( elmtOut.isNull() ) {
-        qDebug( "No out");
-        return ret;
-    } else {
-        lOut    = elmtOut.text();
-        if( lOut.isEmpty() ) {
-            qWarning( "Empty 'out' key !" );
-            return ret;
-        }
-    }
-
-    ret.in  = lIn;
-    ret.out = lOut;
-
-    return ret;
-}
-#endif
-/* ########################################################################## */
-/* ########################################################################## */
 
 bool CDataMapper::listenerAdd(CDataMapperListener *argListener)
 {
@@ -251,17 +203,28 @@ bool CDataMapper::loadFromFile(const QString &argFileName)
 bool    CDataMapper::transmitData(const QString &argInKey, const QVariant &argData)
 {
     if( ! this->m_map.keys().contains( argInKey ) ) {
-        DBG( "Unknown 'in' key `%s`", argInKey.toStdString().c_str() );
+//        DBG( "Unknown 'in' key `%s`", argInKey.toStdString().c_str() );
         return false;
     }
 
 
+
+
     foreach( CDataMapEntry lMapEntry, m_map.values( argInKey ) )
     {
+        bool    ok  = false;
+        QVariant transmittedData;
+        transmittedData
+                = lMapEntry.applyFactor( argData.toDouble( &ok ) );
+        if( ! ok )
+        {
+            transmittedData = argData;
+        }
+
         for( int l = 0 ; l < m_listeners.count() ; ++l )
         {
             m_listeners.at( l )->on_CDataMapper_output( lMapEntry.keyOut(),
-                                                        argData );
+                                                        transmittedData );
         }
     }
 
