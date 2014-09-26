@@ -35,7 +35,9 @@ SOURCES +=\
     src/ui/common/AxesTester.cpp \
     src/ui/GBMappedData.cpp \
     src/core/data/CDataMapEntry.cpp \
-    src/core/data/CDataMapEntryFactor.cpp
+    src/core/data/CDataMapEntryFactor.cpp \
+    src/ui/common/qcustomplot.cpp \
+    src/ui/GBGraphFactorAnalyzer.cpp
 
 HEADERS  += \
     src/ui/MainWindow.h \
@@ -49,7 +51,9 @@ HEADERS  += \
     src/ui/common/AxesTester.h \
     src/ui/GBMappedData.h \
     src/core/data/CDataMapEntry.h \
-    src/core/data/CDataMapEntryFactor.h
+    src/core/data/CDataMapEntryFactor.h \
+    src/ui/common/qcustomplot.h \
+    src/ui/GBGraphFactorAnalyzer.h
 
 OTHER_FILES += \
     run/conf_js.xml

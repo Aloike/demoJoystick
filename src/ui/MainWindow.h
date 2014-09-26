@@ -9,6 +9,7 @@ class QAction;
 
 class CDataMapper;
 class CJoystick;
+class GBGraphFactorAnalyzer;
 class GBMappedData;
 class GBRawData;
 
@@ -25,7 +26,10 @@ public:
     ~MainWindow();
 
 
-    void    on_CDataMapper_output(const QString &argKeyOut, const QVariant &argData);
+    void    on_CDataMapper_output( const QString    &argKeyIn,
+                                   const QVariant   &argDataIn,
+                                   const QString    &argKeyOut,
+                                   const QVariant   &argDataOut );
 
 
 
@@ -55,12 +59,13 @@ private slots:
 
 private:
 
-    QAction         *m_actionJoystickClose;
-    QAction         *m_actionJoystickOpen;
-    CDataMapper     *m_dataMapper;
-    GBMappedData    *m_gbMappedData;
-    GBRawData       *m_gbRawData;
-    CJoystick       *m_joystick;
+    QAction                 *m_actionJoystickClose;
+    QAction                 *m_actionJoystickOpen;
+    CDataMapper             *m_dataMapper;
+    GBGraphFactorAnalyzer   *m_gbFactorAnalyzer;
+    GBMappedData            *m_gbMappedData;
+    GBRawData               *m_gbRawData;
+    CJoystick               *m_joystick;
 
 };
 

@@ -223,7 +223,9 @@ bool    CDataMapper::transmitData(const QString &argInKey, const QVariant &argDa
 
         for( int l = 0 ; l < m_listeners.count() ; ++l )
         {
-            m_listeners.at( l )->on_CDataMapper_output( lMapEntry.keyOut(),
+            m_listeners.at( l )->on_CDataMapper_output( argInKey,
+                                                        argData,
+                                                        lMapEntry.keyOut(),
                                                         transmittedData );
         }
     }

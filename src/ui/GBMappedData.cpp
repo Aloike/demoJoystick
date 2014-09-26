@@ -17,14 +17,20 @@ GBMappedData::GBMappedData(QWidget *parent)
     this->m_atPosition->setAxeY( 16000 );
 }
 
-void GBMappedData::on_CDataMapper_output(const QString &argKeyOut, const QVariant &argData)
+void GBMappedData::on_CDataMapper_output( const QString     &argKeyIn,
+                                          const QVariant    &argDataIn,
+                                          const QString     &argKeyOut,
+                                          const QVariant    &argDataOut )
 {
+    Q_UNUSED( argKeyIn )
+    Q_UNUSED( argDataIn )
+
     if( argKeyOut == "pan" )
     {
-        this->m_atPosition->setAxeX( argData.toInt() );
+        this->m_atPosition->setAxeX( argDataOut.toInt() );
     }
     else if( argKeyOut == "tilt" )
     {
-        this->m_atPosition->setAxeY( argData.toInt() );
+        this->m_atPosition->setAxeY( argDataOut.toInt() );
     }
 }

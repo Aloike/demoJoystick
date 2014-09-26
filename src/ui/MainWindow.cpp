@@ -9,6 +9,7 @@
 #include "core/data/CDataMapper.h"
 #include "core/input/joystick/CJoystick.h"
 
+#include "GBGraphFactorAnalyzer.h"
 #include "GBMappedData.h"
 #include "GBRawData.h"
 
@@ -32,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     ,   m_actionJoystickClose( 0 )
     ,   m_actionJoystickOpen( 0 )
     ,   m_dataMapper( new CDataMapper )
+    ,   m_gbFactorAnalyzer( new GBGraphFactorAnalyzer( this ) )
     ,   m_gbMappedData( new GBMappedData( this ) )
     ,   m_gbRawData( new GBRawData( this ) )
     ,   m_joystick( new CJoystick )
@@ -126,10 +128,12 @@ void    MainWindow::create_layout()
 
     layoutMain->addWidget( this->m_gbRawData );
     layoutMain->addWidget( this->m_gbMappedData );
+    layoutMain->addWidget( this->m_gbFactorAnalyzer );
 
     this->setCentralWidget( new QWidget( this ) );
     this->centralWidget()->setLayout( layoutMain );
 }
+
 
 void    MainWindow::create_menus()
 {
@@ -146,11 +150,36 @@ void    MainWindow::create_menus()
     m_actionJoystickClose->setEnabled( false );
 }
 
-void MainWindow::on_CDataMapper_output( const QString &argKeyOut,
-                                        const QVariant &argData )
+void MainWindow::on_CDataMapper_output( const QString   &argKeyIn,
+                                        const QVariant  &argDataIn,
+                                        const QString   &argKeyOut,
+                                        const QVariant  &argDataOut )
 {
-    Q_UNUSED( argData )
-    Q_UNUSED( argKeyOut )
+    Q_UNUSED( argKeyIn )
+
+    if( argKeyOut == "factor_analyzer" )
+    {
+        bool    ok  = false;
+        double  x   = 0;
+        double  y   = 0;
+
+        x   = argDataIn.toDouble( &ok );
+        if( ! ok ) {
+            DBG( "Ne parvient pas à convertir argDataIn (`%s`)",
+                 argDataIn.toString().toStdString().c_str() );
+            return;
+        }
+
+        y   = argDataOut.toDouble( &ok );
+        if( ! ok ) {
+            DBG( "Ne parvient pas à convertir argDataOut (`%s`)",
+                 argDataOut.toString().toStdString().c_str() );
+            return;
+        }
+
+
+        this->m_gbFactorAnalyzer->addPoint( x, y );
+    }
 
     // qDebug( "Value on argKeyOut `%s`", argKeyOut.toStdString().c_str() );
 }

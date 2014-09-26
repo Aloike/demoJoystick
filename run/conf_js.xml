@@ -3,15 +3,10 @@
     <device>/dev/input/js0</device>
     <data_map_list>
         <MapEntry>
-            <key_in>axis2</key_in>
+            <key_in>axis1</key_in>
             <key_out>pan</key_out>
         </MapEntry>
-        <MapEntry>
-            <key_in>axis2</key_in>
-            <key_out>tilt</key_out>
-            <factor floor="15000"   value="0.5" />
-            <factor floor="32768"   value="1.422"   offset="-15000" />
-        </MapEntry>
+
         <MapEntry>
             <!-- key_in>axis1</key_in -->
             <!-- key_out>tilt</key_out -->
@@ -21,18 +16,38 @@
             <factor floor="-50" value="1" />  <!-- De par le contenu de la ligne précédente, toute valeur d'entrée dans la gamme [-50;5[ se fera appliquer le facteur 1 -->
         </MapEntry>
 
+        <MapEntry>
+            <key_in>axis1</key_in>
+            <key_out>factor_analyzer</key_out>
+
+            <!-- Factors for negative values -->
+            <factor floor="-8192"   value="0.5" />
+            <factor floor="-24576"  value="1" offset="4096" />
+            <factor floor="-30720"  value="2"   offset="28672" />
+            <factor floor="-32768"  value="0"   offset="-32768" />
+
+            <!-- Factors for positive values -->
+            <factor floor="8192"    value="0.5" />
+            <factor floor="24576"   value="1" offset="-4096" />
+            <factor floor="30720"   value="2"   offset="-28672" />
+            <factor floor="32768"   value="0"   offset="32768" />
+        </MapEntry>
+        <MapEntry>
+            <key_in>axis1</key_in>
+            <key_out>tilt</key_out>
+
+            <!-- Factors for negative values -->
+            <factor floor="-8192"   value="0.5" />
+            <factor floor="-24576"  value="1" offset="4096" />
+            <factor floor="-30720"  value="2"   offset="28672" />
+            <factor floor="-32768"  value="0"   offset="-32768" />
+
+            <!-- Factors for positive values -->
+            <factor floor="8192"    value="0.5" />
+            <factor floor="24576"   value="1" offset="-4096" />
+            <factor floor="30720"   value="2"   offset="-28672" />
+            <factor floor="32768"   value="0"   offset="32768" />
+        </MapEntry>
+
     </data_map_list>
 </joystick>
-
-
-
-<!-- data_map_list>
- <data_map>
-  <key_in>axis0</key_in>
-  <key_out>pan</key_out>
- </data_map>
- <data_map>
-  <key_in>axis1</key_in>
-  <key_out>tilt</key_out>
- </data_map>
-</data_map_list -->

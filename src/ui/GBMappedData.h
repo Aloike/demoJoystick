@@ -16,7 +16,10 @@ public:
 
     explicit GBMappedData(QWidget *parent = 0);
 
-    void    on_CDataMapper_output(const QString &argKeyOut, const QVariant &argData);
+    void    on_CDataMapper_output( const QString    &argKeyIn,
+                                   const QVariant   &argDataIn,
+                                   const QString    &argKeyOut,
+                                   const QVariant   &argDataOut );
 
 
 private:
